@@ -1,0 +1,29 @@
+--- vmaf-1.3.9/wrapper/Makefile.orig	2018-08-07 23:36:56.000000000 +0200
++++ vmaf-1.3.9/wrapper/Makefile	2018-10-29 21:05:31.269560608 +0100
+@@ -9,6 +9,7 @@
+ FEATURESRCDIR = $(TOP)/../feature/src
+ PTOOLSDIR = $(TOP)/../ptools
+ INSTALL_PREFIX = /usr/local
++LIBDIR = $(INSTALL_PREFIX)/lib
+ 
+ OBJS = \
+ 	$(OBJDIR)/alloc.o \
+@@ -170,14 +171,14 @@
+ 
+ .PHONY: install
+ install:
+-	mkdir -p $(DESTDIR)$(INSTALL_PREFIX)/lib
++	mkdir -p $(DESTDIR)$(LIBDIR)
+ 	mkdir -p $(DESTDIR)$(INSTALL_PREFIX)/include
+ 	mkdir -p $(DESTDIR)$(INSTALL_PREFIX)/share
+-	mkdir -p $(DESTDIR)$(INSTALL_PREFIX)/lib/pkgconfig
+-	cp $(LIBVMAF) $(DESTDIR)$(INSTALL_PREFIX)/lib/$(LIBVMAF)
++	mkdir -p $(DESTDIR)$(LIBDIR)/pkgconfig
++	cp $(LIBVMAF) $(DESTDIR)$(LIBDIR)/$(LIBVMAF)
+ 	cp src/libvmaf.h $(DESTDIR)$(INSTALL_PREFIX)/include/
+ 	cp -r ../model $(DESTDIR)$(INSTALL_PREFIX)/share/
+-	cp libvmaf.pc $(DESTDIR)$(INSTALL_PREFIX)/lib/pkgconfig/
++	cp libvmaf.pc $(DESTDIR)$(LIBDIR)/pkgconfig/
+ 
+ .PHONY: uninstall
+ uninstall:

@@ -1,0 +1,46 @@
+--- vmaf-1.3.9/wrapper/Makefile.orig	2018-10-29 21:15:18.206220575 +0100
++++ vmaf-1.3.9/wrapper/Makefile	2018-10-31 07:16:17.494822306 +0100
+@@ -1,7 +1,9 @@
+ LIBVMAF = libvmaf.a
++LIBVMAFSO = libvmaf.so
++LIBVMAFSOVER = libvmaf.so.0
+ 
+ .PHONY: all
+-all: $(LIBVMAF) vmafossexec
++all: $(LIBVMAF) $(LIBVMAFSO) vmafossexec
+ 
+ TOP = $(shell pwd)
+ SRCDIR = $(TOP)/src
+@@ -166,7 +168,11 @@
+ $(LIBVMAF): $(OBJS) $(wildcard ../ptools/*.o)
+ 	ar rcs $@ $^
+ 
+-vmafossexec: $(OBJDIR)/main.o $(LIBVMAF)
++$(LIBVMAFSO): $(OBJS) $(wildcard ../ptools/*.o)
++	$(CXX) $(LDFLAGS) $(CFLAGS) -shared -o $(LIBVMAFSOVER) -Wl,-soname,$(LIBVMAFSOVER) $^ -pthread
++	ln -sf $(LIBVMAFSOVER) $(LIBVMAFSO)
++
++vmafossexec: $(OBJDIR)/main.o $(LIBVMAFSO)
+ 	$(CXX) -s -o $@ $(LDFLAGS) $^ -pthread
+ 
+ .PHONY: install
+@@ -175,6 +181,8 @@
+ 	mkdir -p $(DESTDIR)$(INSTALL_PREFIX)/include
+ 	mkdir -p $(DESTDIR)$(INSTALL_PREFIX)/share
+ 	mkdir -p $(DESTDIR)$(LIBDIR)/pkgconfig
++	install $(LIBVMAFSOVER) $(DESTDIR)$(LIBDIR)/$(LIBVMAFSOVER)
++	ln -s $(LIBVMAFSOVER) $(DESTDIR)$(LIBDIR)/$(LIBVMAFSO)
+ 	cp $(LIBVMAF) $(DESTDIR)$(LIBDIR)/$(LIBVMAF)
+ 	cp src/libvmaf.h $(DESTDIR)$(INSTALL_PREFIX)/include/
+ 	cp -r ../model $(DESTDIR)$(INSTALL_PREFIX)/share/
+--- vmaf-1.3.9/feature/Makefile.orig	2018-08-07 23:36:56.000000000 +0200
++++ vmaf-1.3.9/feature/Makefile	2018-10-31 08:01:19.208124793 +0100
+@@ -5,7 +5,7 @@
+ SRCDIR  = $(TOP)/src
+ OBJDIR  = $(TOP)/obj
+ TOOLDIR = $(TOP)/tool
+-LIBVMAF = $(TOP)/../wrapper/libvmaf.a
++LIBVMAF = $(TOP)/../wrapper/libvmaf.so
+ 
+ CFLAGS_COMMON = -g -O3 -fPIC -w -Wextra -pedantic
+ # CFLAGS_COMMON = -g -O0 -fPIC -Wall -Wextra -pedantic
