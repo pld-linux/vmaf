@@ -15,13 +15,13 @@
 Summary:	Netflix's VMAF library
 Summary(pl.UTF-8):	Biblioteka Netflix VMAF
 Name:		vmaf
-Version:	1.3.9
+Version:	1.3.13
 Release:	1
 License:	Apache v2.0
 Group:		Libraries
 #Source0Download: https://github.com/Netflix/vmaf/releases
 Source0:	https://github.com/Netflix/vmaf/archive/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	b5f39df007a66e6b6e284a820066bb70
+# Source0-md5:	d8bb0e755dcd62dcb59861a9497dacaa
 Patch0:		%{name}-libdir.patch
 Patch1:		%{name}-shared.patch
 URL:		https://github.com/Netflix/vmaf
