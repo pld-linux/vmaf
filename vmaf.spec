@@ -1,10 +1,10 @@
 # TODO:
 # - python package
 # - system libs if possible:
-#   libsvm
-#   wrapper/src/pugixml
-#   ptools ?
-#   ptools/opencontainers_1_8_4 ?
+#   libvmaf/src/third_party/ptools
+#   libvmaf/src/third_party/ptools/opencontainers_1_8_4
+#   libvmaf/src/third_party/pugixml
+#   third_party/libsvm
 #
 # Conditional build:
 %bcond_with	sse2	# use SSE2 instructions
@@ -15,17 +15,18 @@
 Summary:	Netflix's VMAF library
 Summary(pl.UTF-8):	Biblioteka Netflix VMAF
 Name:		vmaf
-Version:	1.3.15
+Version:	1.5.1
 Release:	1
-License:	Apache v2.0
+License:	BSD+patent
 Group:		Libraries
 #Source0Download: https://github.com/Netflix/vmaf/releases
 Source0:	https://github.com/Netflix/vmaf/archive/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	69df7b6e200f4b3ac110af7a7505b273
-Patch0:		%{name}-libdir.patch
-Patch1:		%{name}-shared.patch
+# Source0-md5:	f5fdf4e7b06b0e692cafb0527f9ca5c9
+Patch0:		%{name}-shared.patch
 URL:		https://github.com/Netflix/vmaf
 BuildRequires:	libstdc++-devel >= 6:4.8
+BuildRequires:	meson >= 0.47.0
+BuildRequires:	ninja >= 1.5
 BuildRequires:	sed >= 4.0
 Requires:	%{name}-libs = %{version}-%{release}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -42,6 +43,9 @@ Netfliksa.
 Summary:	Netflix VMAF libary
 Summary(pl.UTF-8):	Biblioteka Netflix VMAF
 Group:		Libraries
+%if %{with sse2}
+Requires:	cpuinfo(sse2)
+%endif
 
 %description libs
 Netflix VMAF libary.
@@ -77,35 +81,26 @@ Statyczna biblioteka Netflix VMAF.
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p1
 
 %if %{without sse2}
-%{__sed} -i -e 's,#define ADM_OPT_RECIP_DIVISION,/* & */,' feature/src/adm_options.h
+%{__sed} -i -e 's,#define ADM_OPT_RECIP_DIVISION,/* & */,' libvmaf/src/feature/adm_options.h
 %endif
 
 %build
-CFLAGS="%{rpmcflags}%{?with_sse2: -msse2}" \
-CXXFLAGS="%{rpmcxxflags}%{?with_sse2: -msse2}" \
-CPPFLAGS="%{rpmcppflags}" \
-LDFLAGS="%{rpmldflags}" \
-%{__make} \
-	CC="%{__cc}" \
-	CXX="%{__cxx}" \
+%if %{with sse2}
+CFLAGS="%{rpmcflags} -msse2"
+CXXFLAGS="%{rpmcxxflags} -msse2"
+%endif
+%meson build-libvmaf libvmaf
 
-%{__sed} -i -e 's,^prefix=.*,prefix=%{_prefix},' \
-	-e 's,^libdir=.*,libdir=%{_libdir},' \
-	-e 's,^includedir=.*,includedir=%{_includedir},' wrapper/libvmaf.pc
+%ninja_build -C build-libvmaf
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT%{_bindir}
 
-%{__make} -C wrapper install \
-	DESTDIR=$RPM_BUILD_ROOT \
-	INSTALL_PREFIX=%{_prefix} \
-	LIBDIR=%{_libdir}
+%ninja_install -C build-libvmaf
 
-install feature/{psnr,vmaf} $RPM_BUILD_ROOT%{_bindir}
+install build-libvmaf/tools/{psnr,vmaf,vmaf_rc} $RPM_BUILD_ROOT%{_bindir}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -115,9 +110,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc CHANGELOG.md FAQ.md NOTICE.md README.md VERSION
+%doc CHANGELOG.md FAQ.md LICENSE NOTICE.md README.md VERSION
 %attr(755,root,root) %{_bindir}/psnr
 %attr(755,root,root) %{_bindir}/vmaf
+%attr(755,root,root) %{_bindir}/vmaf_rc
+%attr(755,root,root) %{_bindir}/vmafossexec
 %{_datadir}/model
 
 %files libs
@@ -127,7 +124,7 @@ rm -rf $RPM_BUILD_ROOT
 %files devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libvmaf.so
-%{_includedir}/libvmaf.h
+%{_includedir}/libvmaf
 %{_pkgconfigdir}/libvmaf.pc
 
 %files static
