@@ -15,14 +15,13 @@
 Summary:	Netflix's VMAF library
 Summary(pl.UTF-8):	Biblioteka Netflix VMAF
 Name:		vmaf
-Version:	1.5.1
+Version:	1.5.2
 Release:	1
 License:	BSD+patent
 Group:		Libraries
 #Source0Download: https://github.com/Netflix/vmaf/releases
 Source0:	https://github.com/Netflix/vmaf/archive/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	f5fdf4e7b06b0e692cafb0527f9ca5c9
-Patch0:		%{name}-shared.patch
+# Source0-md5:	0bffac819d2f65c8efaf90c9ab43d27d
 URL:		https://github.com/Netflix/vmaf
 BuildRequires:	libstdc++-devel >= 6:4.8
 BuildRequires:	meson >= 0.47.0
@@ -80,7 +79,6 @@ Statyczna biblioteka Netflix VMAF.
 
 %prep
 %setup -q
-%patch0 -p1
 
 %if %{without sse2}
 %{__sed} -i -e 's,#define ADM_OPT_RECIP_DIVISION,/* & */,' libvmaf/src/feature/adm_options.h
@@ -100,7 +98,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %ninja_install -C build-libvmaf
 
-install build-libvmaf/tools/{psnr,vmaf,vmaf_rc} $RPM_BUILD_ROOT%{_bindir}
+install build-libvmaf/tools/{vmaf_feature,vmaf_rc} $RPM_BUILD_ROOT%{_bindir}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -108,18 +106,23 @@ rm -rf $RPM_BUILD_ROOT
 %post	libs -p /sbin/ldconfig
 %postun	libs -p /sbin/ldconfig
 
+%triggerpostun libs -- vmaf-libs < 1.5.2
+# replace library file with soname symlink
+rm -f %{_libdir}/libvmaf.so.0
+/sbin/ldconfig
+
 %files
 %defattr(644,root,root,755)
 %doc CHANGELOG.md FAQ.md LICENSE NOTICE.md README.md VERSION
-%attr(755,root,root) %{_bindir}/psnr
-%attr(755,root,root) %{_bindir}/vmaf
+%attr(755,root,root) %{_bindir}/vmaf_feature
 %attr(755,root,root) %{_bindir}/vmaf_rc
 %attr(755,root,root) %{_bindir}/vmafossexec
 %{_datadir}/model
 
 %files libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libvmaf.so.0
+%attr(755,root,root) %{_libdir}/libvmaf.so.0.0.0
+%attr(755,root,root) %ghost %{_libdir}/libvmaf.so.0
 
 %files devel
 %defattr(644,root,root,755)
