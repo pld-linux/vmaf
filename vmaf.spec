@@ -15,13 +15,14 @@
 Summary:	Netflix's VMAF library
 Summary(pl.UTF-8):	Biblioteka Netflix VMAF
 Name:		vmaf
-Version:	1.5.2
+Version:	1.5.3
 Release:	1
 License:	BSD+patent
 Group:		Libraries
 #Source0Download: https://github.com/Netflix/vmaf/releases
 Source0:	https://github.com/Netflix/vmaf/archive/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	0bffac819d2f65c8efaf90c9ab43d27d
+# Source0-md5:	73914f1bc2e15a82162549f1eba735fa
+Patch0:		%{name}-x86-nosimd.patch
 URL:		https://github.com/Netflix/vmaf
 BuildRequires:	libstdc++-devel >= 6:4.8
 BuildRequires:	meson >= 0.47.0
@@ -79,6 +80,7 @@ Statyczna biblioteka Netflix VMAF.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %if %{without sse2}
 %{__sed} -i -e 's,#define ADM_OPT_RECIP_DIVISION,/* & */,' libvmaf/src/feature/adm_options.h
