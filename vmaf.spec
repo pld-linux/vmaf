@@ -15,18 +15,21 @@
 Summary:	Netflix's VMAF library
 Summary(pl.UTF-8):	Biblioteka Netflix VMAF
 Name:		vmaf
-Version:	1.5.3
+Version:	2.1.0
 Release:	1
 License:	BSD+patent
 Group:		Libraries
 #Source0Download: https://github.com/Netflix/vmaf/releases
 Source0:	https://github.com/Netflix/vmaf/archive/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	73914f1bc2e15a82162549f1eba735fa
-Patch0:		%{name}-x86-nosimd.patch
+# Source0-md5:	a65e105a67008796d566e9cc38e8e0fe
 URL:		https://github.com/Netflix/vmaf
 BuildRequires:	libstdc++-devel >= 6:4.8
 BuildRequires:	meson >= 0.47.0
-BuildRequires:	ninja >= 1.5
+%ifarch %{ix86} %{x8664} x32
+BuildRequires:	nasm
+%endif
+BuildRequires:	ninja >= 1.7.1
+BuildRequires:	python3 >= 1:3.6
 BuildRequires:	sed >= 4.0
 Requires:	%{name}-libs = %{version}-%{release}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -80,7 +83,8 @@ Statyczna biblioteka Netflix VMAF.
 
 %prep
 %setup -q
-%patch0 -p1
+
+%{__mv} libvmaf/README.md libvmaf/README.libvmaf.md
 
 %if %{without sse2}
 %{__sed} -i -e 's,#define ADM_OPT_RECIP_DIVISION,/* & */,' libvmaf/src/feature/adm_options.h
@@ -100,7 +104,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %ninja_install -C build-libvmaf
 
-install build-libvmaf/tools/{vmaf_feature,vmaf_rc} $RPM_BUILD_ROOT%{_bindir}
+install build-libvmaf/tools/vmafossexec $RPM_BUILD_ROOT%{_bindir}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -115,16 +119,15 @@ rm -f %{_libdir}/libvmaf.so.0
 
 %files
 %defattr(644,root,root,755)
-%doc CHANGELOG.md FAQ.md LICENSE NOTICE.md README.md VERSION
-%attr(755,root,root) %{_bindir}/vmaf_feature
-%attr(755,root,root) %{_bindir}/vmaf_rc
+%doc libvmaf/tools/README.md
+%attr(755,root,root) %{_bindir}/vmaf
 %attr(755,root,root) %{_bindir}/vmafossexec
-%{_datadir}/model
 
 %files libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libvmaf.so.0.0.0
-%attr(755,root,root) %ghost %{_libdir}/libvmaf.so.0
+%doc CHANGELOG.md FAQ.md LICENSE README.md libvmaf/README.libvmaf.md
+%attr(755,root,root) %{_libdir}/libvmaf.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libvmaf.so.1
 
 %files devel
 %defattr(644,root,root,755)
