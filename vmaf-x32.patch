@@ -1,0 +1,15 @@
+--- vmaf-2.1.0/libvmaf/src/meson.build.orig	2020-12-30 18:59:40.000000000 +0100
++++ vmaf-2.1.0/libvmaf/src/meson.build	2021-01-17 07:46:41.998356401 +0100
+@@ -76,7 +76,11 @@
+             nasm_format = 'elf'
+         endif
+         if host_machine.cpu_family() == 'x86_64'
+-            nasm_format += '64'
++	    if cc.get_define('__ILP32__') == '1'
++                nasm_format += 'x32'
++	    else
++	        nasm_format += '64'
++            endif
+         else
+             nasm_format += '32'
+         endif

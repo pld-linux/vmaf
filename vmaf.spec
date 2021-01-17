@@ -22,11 +22,12 @@ Group:		Libraries
 #Source0Download: https://github.com/Netflix/vmaf/releases
 Source0:	https://github.com/Netflix/vmaf/archive/v%{version}/%{name}-%{version}.tar.gz
 # Source0-md5:	a65e105a67008796d566e9cc38e8e0fe
+Patch0:		%{name}-x32.patch
 URL:		https://github.com/Netflix/vmaf
 BuildRequires:	libstdc++-devel >= 6:4.8
 BuildRequires:	meson >= 0.47.0
 %ifarch %{ix86} %{x8664} x32
-BuildRequires:	nasm
+BuildRequires:	nasm >= 2.14
 %endif
 BuildRequires:	ninja >= 1.7.1
 BuildRequires:	python3 >= 1:3.6
@@ -83,6 +84,7 @@ Statyczna biblioteka Netflix VMAF.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %{__mv} libvmaf/README.md libvmaf/README.libvmaf.md
 
@@ -92,10 +94,16 @@ Statyczna biblioteka Netflix VMAF.
 
 %build
 %if %{with sse2}
+# SSE2 requires global support
 CFLAGS="%{rpmcflags} -msse2"
 CXXFLAGS="%{rpmcxxflags} -msse2"
 %endif
-%meson build-libvmaf libvmaf
+
+# AVX512 is (properly) runtime detected (but SSE2 is probably prerequisite)
+%meson build-libvmaf libvmaf \
+%if %{with sse2}
+	-Denable_avx512=true
+%endif
 
 %ninja_build -C build-libvmaf
 
