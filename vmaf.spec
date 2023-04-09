@@ -1,9 +1,6 @@
 # TODO:
 # - python package
 # - system libs if possible:
-#   libvmaf/src/third_party/ptools
-#   libvmaf/src/third_party/ptools/opencontainers_1_8_4
-#   libvmaf/src/third_party/pugixml
 #   third_party/libsvm
 #
 # Conditional build:
@@ -15,15 +12,16 @@
 Summary:	Netflix's VMAF library
 Summary(pl.UTF-8):	Biblioteka Netflix VMAF
 Name:		vmaf
-Version:	2.1.1
+Version:	2.3.1
 Release:	1
 License:	BSD+patent
 Group:		Libraries
 #Source0Download: https://github.com/Netflix/vmaf/releases
 Source0:	https://github.com/Netflix/vmaf/archive/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	9a87089de4a35aa32a57d61343a2fad9
+# Source0-md5:	be40a256a3b739ffc2119b45f919d6bf
 Patch0:		%{name}-x32.patch
 URL:		https://github.com/Netflix/vmaf
+BuildRequires:	gcc >= 6:4.8
 BuildRequires:	libstdc++-devel >= 6:4.8
 BuildRequires:	meson >= 0.47.0
 %ifarch %{ix86} %{x8664} x32
@@ -133,7 +131,7 @@ rm -f %{_libdir}/libvmaf.so.0
 
 %files libs
 %defattr(644,root,root,755)
-%doc CHANGELOG.md FAQ.md LICENSE README.md libvmaf/README.libvmaf.md
+%doc CHANGELOG.md LICENSE README.md libvmaf/README.libvmaf.md
 %attr(755,root,root) %{_libdir}/libvmaf.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libvmaf.so.1
 
