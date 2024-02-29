@@ -1,4 +1,5 @@
 # TODO:
+# - enable_cuda, enable_nvtx on bcond
 # - python package
 # - system libs if possible:
 #   third_party/libsvm
@@ -12,18 +13,18 @@
 Summary:	Netflix's VMAF library
 Summary(pl.UTF-8):	Biblioteka Netflix VMAF
 Name:		vmaf
-Version:	2.3.1
+Version:	3.0.0
 Release:	1
 License:	BSD+patent
 Group:		Libraries
 #Source0Download: https://github.com/Netflix/vmaf/releases
 Source0:	https://github.com/Netflix/vmaf/archive/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	be40a256a3b739ffc2119b45f919d6bf
+# Source0-md5:	dfd67ebfbfcb66ce76abc56fde0df06f
 Patch0:		%{name}-x32.patch
 URL:		https://github.com/Netflix/vmaf
 BuildRequires:	gcc >= 6:4.8
 BuildRequires:	libstdc++-devel >= 6:4.8
-BuildRequires:	meson >= 0.47.0
+BuildRequires:	meson >= 0.56.1
 %ifarch %{ix86} %{x8664} x32
 BuildRequires:	nasm >= 2.14
 %endif
@@ -110,8 +111,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %ninja_install -C build-libvmaf
 
-install build-libvmaf/tools/vmafossexec $RPM_BUILD_ROOT%{_bindir}
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -127,13 +126,12 @@ rm -f %{_libdir}/libvmaf.so.0
 %defattr(644,root,root,755)
 %doc libvmaf/tools/README.md
 %attr(755,root,root) %{_bindir}/vmaf
-%attr(755,root,root) %{_bindir}/vmafossexec
 
 %files libs
 %defattr(644,root,root,755)
 %doc CHANGELOG.md LICENSE README.md libvmaf/README.libvmaf.md
 %attr(755,root,root) %{_libdir}/libvmaf.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libvmaf.so.1
+%attr(755,root,root) %ghost %{_libdir}/libvmaf.so.3
 
 %files devel
 %defattr(644,root,root,755)
