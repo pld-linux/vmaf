@@ -83,7 +83,7 @@ Statyczna biblioteka Netflix VMAF.
 
 %prep
 %setup -q
-%patch0 -p1
+%patch -P0 -p1
 
 %{__mv} libvmaf/README.md libvmaf/README.libvmaf.md
 
