@@ -1,8 +1,6 @@
 # TODO:
 # - enable_cuda, enable_nvtx on bcond
 # - python package
-# - system libs if possible:
-#   third_party/libsvm
 #
 # Conditional build:
 %bcond_with	sse2	# use SSE2 instructions
@@ -13,13 +11,13 @@
 Summary:	Netflix's VMAF library
 Summary(pl.UTF-8):	Biblioteka Netflix VMAF
 Name:		vmaf
-Version:	3.0.0
+Version:	3.2.0
 Release:	1
 License:	BSD+patent
 Group:		Libraries
 #Source0Download: https://github.com/Netflix/vmaf/releases
 Source0:	https://github.com/Netflix/vmaf/archive/v%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	dfd67ebfbfcb66ce76abc56fde0df06f
+# Source0-md5:	ed5fdf1fe4acf1edfab46f14affb58e2
 Patch0:		%{name}-x32.patch
 URL:		https://github.com/Netflix/vmaf
 BuildRequires:	gcc >= 6:4.8
@@ -30,6 +28,7 @@ BuildRequires:	nasm >= 2.14
 %endif
 BuildRequires:	ninja >= 1.7.1
 BuildRequires:	python3 >= 1:3.6
+BuildRequires:	rpmbuild(macros) >= 2.042
 BuildRequires:	sed >= 4.0
 Requires:	%{name}-libs = %{version}-%{release}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -98,18 +97,19 @@ CFLAGS="%{rpmcflags} -msse2"
 CXXFLAGS="%{rpmcxxflags} -msse2"
 %endif
 
+%define _vpath_srcdir	libvmaf
 # AVX512 is (properly) runtime detected (but SSE2 is probably prerequisite)
-%meson build-libvmaf libvmaf \
+%meson \
 %if %{with sse2}
 	-Denable_avx512=true
 %endif
 
-%ninja_build -C build-libvmaf
+%meson_build
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%ninja_install -C build-libvmaf
+%meson_install
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -130,12 +130,12 @@ rm -f %{_libdir}/libvmaf.so.0
 %files libs
 %defattr(644,root,root,755)
 %doc CHANGELOG.md LICENSE README.md libvmaf/README.libvmaf.md
-%attr(755,root,root) %{_libdir}/libvmaf.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libvmaf.so.3
+%{_libdir}/libvmaf.so.*.*.*
+%ghost %{_libdir}/libvmaf.so.3
 
 %files devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libvmaf.so
+%{_libdir}/libvmaf.so
 %{_includedir}/libvmaf
 %{_pkgconfigdir}/libvmaf.pc
 
